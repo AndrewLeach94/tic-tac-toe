@@ -19,21 +19,10 @@ const Gameboard = (playerOne, playerTwo) => {
     
     })();
 
-    const updateGameboard = (player1Active, player2Active) => {
-        let newGameboardArray = [...gameBoardArray];
-        newGameboardArray.push("X");
-
-        
-        //send new value to the pressed key 
-        event.target.textContent = newGameboardArray[newGameboardArray.length - 1];
-        
-        console.log(newGameboardArray);
-        return newGameboardArray;
-    }
     
     const newGame = buildGameBoard;
 
-    return {gameBoardArray, newGame, updateGameboard};
+    return {gameBoardArray, newGame};
     
 };
 
@@ -50,48 +39,85 @@ const PlayGame = () => {
     const player1 = Player("Andrew", true);
     const player2 = Player("Bobby", false);
 
-    //this function changes the player's active status 
-    const setActivePlayer = (newActivePlayer) => {
-        newActivePlayer.isActive = true;
-        return newActivePlayer;
+
+    const eventListeners = () => {
+        const gridSquares = document.getElementsByClassName("grid-square");
+
+        const mouseClick = () => {
+            makeTurn();
+            //remove listener when done
+            removeListeners(event.target);
+        }
+        const addListeners = () => {
+            for (i = 0; i < gridSquares.length; i++) {
+                gridSquares[i].addEventListener("click", mouseClick);
+            }
         }
 
-    // const player1Turn = setActivePlayer(player1);
+        const removeListeners = (target) => {
+            console.log(target);
+            target.removeEventListener("click", mouseClick);
+        }
+        
+        return {addListeners, removeListeners};
+        }
+    
+
     
     // start game when user clicks on start button
     const startNewGame = () => {
-    return setActivePlayer(player1);
+        eventListeners().addListeners();
     }
 
     // the player's mark is left on click
     const makeTurn = () => {
         //check for who's turn it is
-        console.log(player1.isActive)
-        console.log(player2.isActive)
         if (player1.isActive == true) {
             event.target.textContent = "X";
 
+            //set player 2 to be new active player
             player2.isActive = true;
             player1.isActive = false;
-            console.log(player1)
-            console.log(player2)
-        }
+
+            //remove event listener
+         }
 
         else {
             event.target.textContent = "O";
-            return setActivePlayer(player1); 
+                //set player 2 to be new active player
+                player1.isActive = true;
+                player2.isActive = false;
         }
-
 
     }
     
 
-    return {player1, player2, setActivePlayer, startNewGame, makeTurn};
+    return {player1, player2, startNewGame, makeTurn};
 }
 
 //initialize the game
 Gameboard().newGame;
 
+
+
+
+const testButtons = document.getElementsByClassName("test_button");
+
+
+const alertTest = () => {
+    alert("Hello");
+    removeListener(event.target);
+}
+
+function removeListener(target) {
+    target.removeEventListener("click", alertTest);
+}
+
+(function addTestListeners() {
+    for(i=0; i < testButtons.length; i++) {
+        testButtons[i].addEventListener("click", alertTest);
+    }
+})();
 
 
 
