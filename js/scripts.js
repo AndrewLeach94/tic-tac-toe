@@ -1,6 +1,17 @@
 //initialize the gameboard
-const Gameboard = (playerOne, playerTwo) => {
-    let gameBoardArray = ["Hello", "World"];
+const Gameboard = () => {
+    let gameBoardArray = [];
+    // if a player attains any of these combos, they're declared the winner
+    const winningCombos = [
+        [1, 4, 7],
+        [2, 5, 8],
+        [3, 6, 9],
+        [1, 2, 3],
+        [3, 5, 6],
+        [7, 8, 9],
+        [7, 5, 3],
+        [1, 5, 9]
+    ];
     
     
     let gridSquares = document.getElementsByClassName("grid-square");
@@ -22,15 +33,16 @@ const Gameboard = (playerOne, playerTwo) => {
     
     const newGame = buildGameBoard;
 
-    return {gameBoardArray, newGame};
+    return {gameBoardArray, newGame, winningCombos};
     
 };
 
 //initialize the players with factory function
-const Player = (playerName, activeStatus) => {
+const Player = (playerName, activeStatus, buttons) => {
     const name = playerName
     const isActive = activeStatus
-    return {name, isActive};
+    const buttonsClicked = []
+    return {name, isActive, buttonsClicked};
 }
 
 
@@ -55,39 +67,89 @@ const PlayGame = () => {
         }
 
         const removeListeners = (target) => {
-            console.log(target);
             target.removeEventListener("click", mouseClick);
         }
         
         return {addListeners, removeListeners};
         }
     
-
-    
     // start game when user clicks on start button
     const startNewGame = () => {
         eventListeners().addListeners();
     }
 
-    // the player's mark is left on click
+    // leave player mark on button, log score, and check for a win on each click
     const makeTurn = () => {
         //check for who's turn it is
         if (player1.isActive == true) {
             event.target.textContent = "X";
+            
+            //update the player's score
+            updatePlayerScore(event.target);
+
+            //check for a win!
+            checkforWin(player1);
 
             //set player 2 to be new active player
             player2.isActive = true;
             player1.isActive = false;
 
-            //remove event listener
          }
 
         else {
             event.target.textContent = "O";
-                //set player 2 to be new active player
-                player1.isActive = true;
-                player2.isActive = false;
+            
+            //update the player's score
+            updatePlayerScore(event.target);
+
+            //check for a win!
+            checkforWin(player2);
+
+
+            //set player 2 to be new active player
+            player1.isActive = true;
+            player2.isActive = false;
         }
+
+    }
+
+    const updatePlayerScore = (target) => {
+        if (player1.isActive == true) {
+            //take data attribute from the button selected and push it to the player's button log
+            let clickedButton = parseInt(target.dataset.index)
+            return player1.buttonsClicked.push(clickedButton);
+        }
+
+        else {
+            let clickedButton = parseInt(target.dataset.index)
+            return player2.buttonsClicked.push(clickedButton);
+
+        }
+    }
+    
+    const checkforWin = (player) => {
+        let allWinningCombos = Gameboard().winningCombos;
+        let playerScore = player.buttonsClicked;
+        console.log(playerScore);
+
+        allWinningCombos.forEach((item) => {
+            //attempt to match player selections with one of the winning combos 
+            console.log(item);
+            let isWinner = item.every(function() {
+                //pull out the individual button id for every winning combination
+                let a = item[0];
+                let b = item[1];
+                let c = item[2];
+
+                //declare the winner once a player is the first to achieve a winning combination
+                if  (playerScore.includes(a) == true && 
+                    playerScore.includes(b) == true && 
+                    playerScore.includes(c) == true) {
+                    alert("Yay");
+                }
+            })
+
+        })
 
     }
     
@@ -97,27 +159,6 @@ const PlayGame = () => {
 
 //initialize the game
 Gameboard().newGame;
-
-
-
-
-const testButtons = document.getElementsByClassName("test_button");
-
-
-const alertTest = () => {
-    alert("Hello");
-    removeListener(event.target);
-}
-
-function removeListener(target) {
-    target.removeEventListener("click", alertTest);
-}
-
-(function addTestListeners() {
-    for(i=0; i < testButtons.length; i++) {
-        testButtons[i].addEventListener("click", alertTest);
-    }
-})();
 
 
 
