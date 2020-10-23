@@ -7,21 +7,16 @@ const Gameboard = () => {
         [2, 5, 8],
         [3, 6, 9],
         [1, 2, 3],
+        [4, 5, 6],
         [3, 5, 6],
         [7, 8, 9],
         [7, 5, 3],
         [1, 5, 9]
-    ];
-    
+    ];    
     
     let gridSquares = document.getElementsByClassName("grid-square");
     
     const buildGameBoard = (() => {
-        //sends gameboard array values to the gridsquares
-        for (i = 0; i < gameBoardArray.length; i++) {
-            gridSquares[i].textContent = gameBoardArray[i];
-        }
-
         //add event listener to the startbutton
         const startButton = document.querySelector("#button_start");
         startButton.addEventListener("click", () => {
@@ -82,6 +77,10 @@ const PlayGame = () => {
     const makeTurn = () => {
         //check for who's turn it is
         if (player1.isActive == true) {
+            //change button style to player1
+            let clickedButton = event.target;
+            clickedButton.className = "grid_square-player1";
+            
             event.target.textContent = "X";
             
             //update the player's score
@@ -97,6 +96,10 @@ const PlayGame = () => {
          }
 
         else {
+
+            //change button style to player2
+            let clickedButton = event.target;
+            clickedButton.className = "grid_square-player2";            
             event.target.textContent = "O";
             
             //update the player's score
@@ -130,11 +133,9 @@ const PlayGame = () => {
     const checkforWin = (player) => {
         let allWinningCombos = Gameboard().winningCombos;
         let playerScore = player.buttonsClicked;
-        console.log(playerScore);
 
         allWinningCombos.forEach((item) => {
             //attempt to match player selections with one of the winning combos 
-            console.log(item);
             let isWinner = item.every(function() {
                 //pull out the individual button id for every winning combination
                 let a = item[0];
@@ -145,12 +146,17 @@ const PlayGame = () => {
                 if  (playerScore.includes(a) == true && 
                     playerScore.includes(b) == true && 
                     playerScore.includes(c) == true) {
-                    alert("Yay");
+                    //declare the winner!
+                    declareWinner(player.name);
                 }
             })
 
         })
 
+    }
+
+    const declareWinner = (winnerName) => {
+        return alert(`Congratulations ${winnerName}, you've won!`);
     }
     
 

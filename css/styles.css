@@ -1,6 +1,79 @@
+html {
+    font-family: 'Neucha', cursive;
+    font-size: 16px;
+}
+
+body {
+    background-color: whitesmoke;
+}
+
 #game-container {
+    background-color: black;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
-    width: 50vw;
+    row-gap: 5px;
+    column-gap: 5px;
+    width: 60vw;
+    height: 60vh;
+    box-shadow: 0px 3px 6px 5px #0000001f;
+    margin-bottom: 50px;
+    border-radius: 5px;
+}
+
+.grid-square {
+    background-color: #F6E8EA;
+    font-size: 4.2rem;
+}
+
+.grid_square-player1 {
+    color: #BC4749;
+    font-size: 4.7rem;
+}
+
+.grid_square-player2 {
+    color: #05A8AA;
+    font-size: 4.7rem;
+}
+
+button {
+    background-color: #F6E8EA;
+    border: none;
+    font-family: 'Neucha', cursive;
+}
+
+#button_start {
+    border: 3px solid #7C77B9;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0px 3px 4px 2px #0000001f;
+    font-size: 1.7rem;
+}
+
+header {
+    text-align: center;
+}
+
+main {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+footer {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    text-align: center;
 }
