@@ -1,8 +1,7 @@
 //initialize the gameboard
 const Gameboard = () => {
-    let gameBoardArray = [];
-    // if a player attains any of these combos, they're declared the winner
     const winningCombos = [
+        // if a player attains any of these button combos, they're declared the winner
         [1, 4, 7],
         [2, 5, 8],
         [3, 6, 9],
@@ -13,27 +12,80 @@ const Gameboard = () => {
         [7, 5, 3],
         [1, 5, 9]
     ];    
-    
-    let gridSquares = document.getElementsByClassName("grid-square");
-    
-    const buildGameBoard = (() => {
+        
+    const buildGameBoard = () => {
         //add event listener to the startbutton
         const startButton = document.querySelector("#button_start");
-        startButton.addEventListener("click", () => {
-            PlayGame().startNewGame();
+        
+        const newGame = () => {
+            startGameModal();
+            startButton.removeEventListener("click", newGame)
+        }
+
+        startButton.addEventListener("click", newGame);
+    
+    };
+
+    const startGameModal = () => {
+        // create the start game modal where player's can fill in their names
+        const modalBackdrop = document.createElement("div");
+        modalBackdrop.classList.add("modal_backdrop");
+        document.body.appendChild(modalBackdrop);
+
+        const modal = document.createElement("div");
+        modal.classList.add("modal");
+        modalBackdrop.appendChild(modal);
+
+        const modalHeader = document.createElement("h2");
+        modalHeader.textContent = "Who's playing?"
+        modal.appendChild(modalHeader);
+
+        const firstPlayerLabel = document.createElement("label");
+        firstPlayerLabel.textContent = "Player 1";
+        modal.appendChild(firstPlayerLabel);
+
+        const firstPlayerInput = document.createElement("input");
+        firstPlayerInput.type = "text";
+        firstPlayerInput.id = "player1-name";
+        firstPlayerLabel.appendChild(firstPlayerInput);
+
+        const secondPlayerLabel = document.createElement("label");
+        secondPlayerLabel.textContent = "Player 2";
+        modal.appendChild(secondPlayerLabel);
+
+        const secondPlayerInput = document.createElement("input");
+        secondPlayerInput.type = "text";
+        secondPlayerInput.id = "player2-name";
+        secondPlayerLabel.appendChild(secondPlayerInput);
+
+        const startPlayingButton = document.createElement("button");
+        startPlayingButton.classList.add("button_CTA");
+        startPlayingButton.id = "button_startPlaying"
+        startPlayingButton.type = "button"
+        startPlayingButton.textContent = "Start Playing";
+        modal.appendChild(startPlayingButton);
+
+        //add event listener to Start Button
+        startPlayingButton.addEventListener("click", () => {
+            //pass on player names
+            PlayGame().startNewGame(firstPlayerInput.value, secondPlayerInput.value);
+            //remove the modal
+            modalBackdrop.remove();
         })
-    
-    })();
 
-    
-    const newGame = buildGameBoard;
+    }
 
-    return {gameBoardArray, newGame, winningCombos};
+    const changePlayerNameState = (newActivePlayer, inactivePlayer) => {
+        newActivePlayer.className = ("turn_active");
+        inactivePlayer.className = ("turn_inactive");
+    }
+
+    return {buildGameBoard, winningCombos, startGameModal, changePlayerNameState};
     
 };
 
 //initialize the players with factory function
-const Player = (playerName, activeStatus, buttons) => {
+const Player = (playerName, activeStatus) => {
     const name = playerName
     const isActive = activeStatus
     const buttonsClicked = []
@@ -43,8 +95,9 @@ const Player = (playerName, activeStatus, buttons) => {
 
 const PlayGame = () => {
     // define players 1 and 2
-    const player1 = Player("Andrew", true);
-    const player2 = Player("Bobby", false);
+    const player1 = Player("Player 1", true);
+    const player2 = Player("Player 2", false);
+
 
 
     const eventListeners = () => {
@@ -69,8 +122,29 @@ const PlayGame = () => {
         }
     
     // start game when user clicks on start button
-    const startNewGame = () => {
+    const startNewGame = (player1Name, player2Name) => {
+        const setPlayerNames = (player1Name, player2Name) => {
+            //changes player names to whatever the user typed in - otherwise defaults to "player 1" and "player 2"
+            if (player1Name != "") {
+                player1.name = player1Name;
+
+                // update name on display
+                const player1Display = document.querySelector("#player1-display")
+                player1Display.textContent = player1Name;
+            }
+    
+            if (player2Name != "") {
+                player2.name = player2Name;
+
+                // update name on display
+                const player2Display = document.querySelector("#player2-display")
+                player2Display.textContent = player2Name;
+                
+            }
+        }
+
         eventListeners().addListeners();
+        setPlayerNames(player1Name, player2Name);
     }
 
     // leave player mark on button, log score, and check for a win on each click
@@ -89,10 +163,17 @@ const PlayGame = () => {
             //check for a win!
             checkforWin(player1);
 
+            //check if it's a tie
+            checkForTie();
+
             //set player 2 to be new active player
             player2.isActive = true;
             player1.isActive = false;
 
+            //update state of the player name display
+            let player1Display = document.querySelector("#player1-display")
+            let player2Display = document.querySelector("#player2-display")
+            Gameboard().changePlayerNameState(player2Display, player1Display);
          }
 
         else {
@@ -108,10 +189,19 @@ const PlayGame = () => {
             //check for a win!
             checkforWin(player2);
 
+            //check if it's a tie
+            checkForTie();
+
 
             //set player 2 to be new active player
             player1.isActive = true;
             player2.isActive = false;
+
+            //update state of the player name display
+            let player1Display = document.querySelector("#player1-display")
+            let player2Display = document.querySelector("#player2-display")
+            Gameboard().changePlayerNameState(player1Display, player2Display);
+            
         }
 
     }
@@ -155,8 +245,20 @@ const PlayGame = () => {
 
     }
 
+    const checkForTie = () => {
+        // loop through the game board to check if any default grid states remain - end game if none exist
+        let gridBoard = document.getElementsByClassName("grid-square");
+        if (gridBoard.length == 0) {
+            alert("It's a tie!");
+        }
+    }
+
     const declareWinner = (winnerName) => {
         return alert(`Congratulations ${winnerName}, you've won!`);
+    }
+
+    const declareTie = () => {
+
     }
     
 
@@ -164,7 +266,7 @@ const PlayGame = () => {
 }
 
 //initialize the game
-Gameboard().newGame;
+Gameboard().buildGameBoard();
 
 
 
