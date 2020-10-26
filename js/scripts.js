@@ -1,5 +1,6 @@
 //initialize the gameboard
 const Gameboard = () => {
+
     const winningCombos = [
         // if a player attains any of these button combos, they're declared the winner
         [1, 4, 7],
@@ -7,7 +8,6 @@ const Gameboard = () => {
         [3, 6, 9],
         [1, 2, 3],
         [4, 5, 6],
-        [3, 5, 6],
         [7, 8, 9],
         [7, 5, 3],
         [1, 5, 9]
@@ -67,8 +67,41 @@ const Gameboard = () => {
 
         //add event listener to Start Button
         startPlayingButton.addEventListener("click", () => {
+            // cache player names for when the round ends
+            cachedPlayer1Name = firstPlayerInput.value;
+            cachedPlayer2Name = secondPlayerInput.value;
             //pass on player names
-            PlayGame().startNewGame(firstPlayerInput.value, secondPlayerInput.value);
+            PlayGame().startNewGame(cachedPlayer1Name, cachedPlayer2Name);
+            //remove the modal
+            modalBackdrop.remove();
+        })
+
+    }
+    const endGameModal = (winnerName, cachedPlayer1Name, cachedPlayer2Name) => {
+        // create the start game modal where player's can fill in their names
+        const modalBackdrop = document.createElement("div");
+        modalBackdrop.classList.add("modal_backdrop");
+        document.body.appendChild(modalBackdrop);
+
+        const modal = document.createElement("div");
+        modal.classList.add("modal");
+        modalBackdrop.appendChild(modal);
+
+        const modalHeader = document.createElement("h2");
+        modalHeader.textContent = `Congratulations ${winnerName}, you won!`
+        modal.appendChild(modalHeader);
+
+        const resetButton = document.createElement("button");
+        resetButton.classList.add("button_CTA");
+        resetButton.id = "button_reset"
+        resetButton.type = "button"
+        resetButton.textContent = "Reset Game";
+        modal.appendChild(resetButton);
+
+        //add event listener to Start Button
+        resetButton.addEventListener("click", () => {
+            //pass on cached player name from initial setup
+            PlayGame().resetGame(cachedPlayer1Name, cachedPlayer2Name);
             //remove the modal
             modalBackdrop.remove();
         })
@@ -80,24 +113,23 @@ const Gameboard = () => {
         inactivePlayer.className = ("turn_inactive");
     }
 
-    return {buildGameBoard, winningCombos, startGameModal, changePlayerNameState};
+    return {buildGameBoard, winningCombos, startGameModal, changePlayerNameState, endGameModal};
     
 };
 
 //initialize the players with factory function
-const Player = (playerName, activeStatus) => {
-    const name = playerName
-    const isActive = activeStatus
-    const buttonsClicked = []
+const Player = (playerName, activeStatus, buttonsList) => {
+    let name = playerName;
+    let isActive = activeStatus;
+    let buttonsClicked = buttonsList;
     return {name, isActive, buttonsClicked};
 }
 
 
 const PlayGame = () => {
     // define players 1 and 2
-    const player1 = Player("Player 1", true);
-    const player2 = Player("Player 2", false);
-
+    const player1 = Player("Player 1", true, []);
+    const player2 = Player("Player 2", false, []);    
 
 
     const eventListeners = () => {
@@ -145,6 +177,12 @@ const PlayGame = () => {
 
         eventListeners().addListeners();
         setPlayerNames(player1Name, player2Name);
+
+        //update state of the player name display
+        let player1Display = document.querySelector("#player1-display")
+        let player2Display = document.querySelector("#player2-display")
+        Gameboard().changePlayerNameState(player1Display, player2Display);
+        
     }
 
     // leave player mark on button, log score, and check for a win on each click
@@ -226,7 +264,7 @@ const PlayGame = () => {
 
         allWinningCombos.forEach((item) => {
             //attempt to match player selections with one of the winning combos 
-            let isWinner = item.every(function() {
+            item.every(function() {
                 //pull out the individual button id for every winning combination
                 let a = item[0];
                 let b = item[1];
@@ -254,15 +292,35 @@ const PlayGame = () => {
     }
 
     const declareWinner = (winnerName) => {
-        return alert(`Congratulations ${winnerName}, you've won!`);
+        // cache the player names from initial startup
+        const cachedPlayer1Name = player1.name;
+        const cachedPlayer2Name = player2.name;
+
+        // return alert(`Congratulations ${winnerName}, you've won!`);
+        Gameboard().endGameModal(winnerName, cachedPlayer1Name, cachedPlayer2Name);
+    }    
+
+    const resetGame = (cachedPlayer1Name, cachedPlayer2Name) => {    
+        //reset all the grid squares
+        const gridSquares = document.querySelector("#game-container").children;
+
+        for (i = 0; i < gridSquares.length; i++) {
+            gridSquares[i].textContent = "";
+            gridSquares[i].className = "grid-square";
+        }
+
+        //reset the player point counts
+        // player1.buttonsClicked = [];
+        // player2.buttonsClicked = [];
+
+        //reset player active status
+        player1.isActive = true;
+        player2.isActive = false;
+        //run start new game function
+        startNewGame(cachedPlayer1Name, cachedPlayer2Name);
     }
 
-    const declareTie = () => {
-
-    }
-    
-
-    return {player1, player2, startNewGame, makeTurn};
+    return {player1, player2, startNewGame, makeTurn, resetGame};
 }
 
 //initialize the game
