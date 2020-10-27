@@ -65,8 +65,37 @@ const Gameboard = () => {
         startPlayingButton.textContent = "Start Playing";
         modal.appendChild(startPlayingButton);
 
+        //replace the start button with restart button
+
+        const replaceWithResetButton = () => {
+            const oldStartButton = document.querySelector("#button_start")
+            oldStartButton.remove();
+
+            const resetButton = document.createElement("button");
+            resetButton.classList.add("button_primary");
+            resetButton.id = "button_reset"
+            resetButton.type = "button"
+            resetButton.textContent = "Reset";
+
+            let mainBody = document.querySelector("main");
+            mainBody.appendChild(resetButton);
+
+            // cache player names for when the round ends
+            cachedPlayer1Name = firstPlayerInput.value;
+            cachedPlayer2Name = secondPlayerInput.value;
+            
+            
+            // reset game on click
+            resetButton.addEventListener("click", () => {
+                PlayGame().resetGame(cachedPlayer1Name, cachedPlayer2Name);
+            });
+        }
+
         //add event listener to Start Button
         startPlayingButton.addEventListener("click", () => {
+            //replace start button with reset button
+            replaceWithResetButton();
+
             // cache player names for when the round ends
             cachedPlayer1Name = firstPlayerInput.value;
             cachedPlayer2Name = secondPlayerInput.value;
@@ -108,12 +137,43 @@ const Gameboard = () => {
 
     }
 
+    const tieGameModal = (cachedPlayer1Name, cachedPlayer2Name) => {
+        // create the start game modal where player's can fill in their names
+        const modalBackdrop = document.createElement("div");
+        modalBackdrop.classList.add("modal_backdrop");
+        document.body.appendChild(modalBackdrop);
+
+        const modal = document.createElement("div");
+        modal.classList.add("modal");
+        modalBackdrop.appendChild(modal);
+
+        const modalHeader = document.createElement("h2");
+        modalHeader.textContent = "It's a tie"
+        modal.appendChild(modalHeader);
+
+        const resetButton = document.createElement("button");
+        resetButton.classList.add("button_CTA");
+        resetButton.id = "button_reset"
+        resetButton.type = "button"
+        resetButton.textContent = "Reset Game";
+        modal.appendChild(resetButton);
+
+        //add event listener to Start Button
+        resetButton.addEventListener("click", () => {
+            //pass on cached player name from initial setup
+            PlayGame().resetGame(cachedPlayer1Name, cachedPlayer2Name);
+            //remove the modal
+            modalBackdrop.remove();
+        })
+
+    }
+
     const changePlayerNameState = (newActivePlayer, inactivePlayer) => {
         newActivePlayer.className = ("turn_active");
         inactivePlayer.className = ("turn_inactive");
     }
 
-    return {buildGameBoard, winningCombos, startGameModal, changePlayerNameState, endGameModal};
+    return {buildGameBoard, winningCombos, startGameModal, changePlayerNameState, endGameModal, tieGameModal};
     
 };
 
@@ -128,8 +188,8 @@ const Player = (playerName, activeStatus, buttonsList) => {
 
 const PlayGame = () => {
     // define players 1 and 2
-    const player1 = Player("Player 1", true, []);
-    const player2 = Player("Player 2", false, []);    
+    let player1 = Player("Player 1", true, []);
+    let player2 = Player("Player 2", false, []);    
 
 
     const eventListeners = () => {
@@ -150,7 +210,7 @@ const PlayGame = () => {
             target.removeEventListener("click", mouseClick);
         }
         
-        return {addListeners, removeListeners};
+        return {addListeners, removeListeners, mouseClick};
         }
     
     // start game when user clicks on start button
@@ -198,11 +258,11 @@ const PlayGame = () => {
             //update the player's score
             updatePlayerScore(event.target);
 
-            //check for a win!
-            checkforWin(player1);
-
             //check if it's a tie
             checkForTie();
+
+            //check for a win!
+            checkforWin(player1);
 
             //set player 2 to be new active player
             player2.isActive = true;
@@ -284,10 +344,17 @@ const PlayGame = () => {
     }
 
     const checkForTie = () => {
+        // cache the player names from initial startup
+        const cachedPlayer1Name = player1.name;
+        const cachedPlayer2Name = player2.name;
+        
         // loop through the game board to check if any default grid states remain - end game if none exist
         let gridBoard = document.getElementsByClassName("grid-square");
         if (gridBoard.length == 0) {
-            alert("It's a tie!");
+            //delete player inventory to fix tie game + winner bug
+            player1.buttonsClicked = [];
+            player2.buttonsClicked = [];
+            Gameboard().tieGameModal(cachedPlayer1Name, cachedPlayer2Name);
         }
     }
 
@@ -301,17 +368,26 @@ const PlayGame = () => {
     }    
 
     const resetGame = (cachedPlayer1Name, cachedPlayer2Name) => {    
-        //reset all the grid squares
-        const gridSquares = document.querySelector("#game-container").children;
+        //remove every grid
+        const gridContainer = document.querySelector("#game-container");
 
-        for (i = 0; i < gridSquares.length; i++) {
-            gridSquares[i].textContent = "";
-            gridSquares[i].className = "grid-square";
+        while (gridContainer.firstChild) {
+                gridContainer.removeChild(gridContainer.firstChild);
+            };
+
+        //rebuild an identical new grid from scratch
+        for (i = 1; i < 10; i++) {
+            const newGridSquare = document.createElement("button");
+            gridContainer.appendChild(newGridSquare);
+            newGridSquare.id = "grid-square-" + [i];
+            newGridSquare.className = "grid-square";
+            newGridSquare.type = "button";
+            newGridSquare.dataset.index = [i];
         }
 
         //reset the player point counts
-        // player1.buttonsClicked = [];
-        // player2.buttonsClicked = [];
+        player1.buttonsClicked = [];
+        player2.buttonsClicked = [];
 
         //reset player active status
         player1.isActive = true;

@@ -12,6 +12,7 @@ body {
     flex-direction: row;
     justify-content: space-around;
     width: 60vw;
+    max-width: 800px;
     margin-bottom: 30px;
 }
 
@@ -23,6 +24,7 @@ body {
     row-gap: 5px;
     column-gap: 5px;
     width: 60vw;
+    max-width: 800px;
     height: 60vh;
     box-shadow: 0px 3px 6px 5px #0000001f;
     margin-bottom: 50px;
@@ -50,7 +52,7 @@ button {
     font-family: 'Neucha', cursive;
 }
 
-#button_start {
+.button_primary {
     border: 3px solid #7C77B9;
     padding: 20px 30px;
     border-radius: 10px;
@@ -84,17 +86,6 @@ main {
     align-items: center;
     justify-content: center;
     height: 100vh;
-}
-
-footer {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    text-align: center;
 }
 
 .modal {
