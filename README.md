@@ -3,7 +3,7 @@
 As a user, I want to be able to play a game of tic-tac-toe with a friend - from anywhere.
 
 ### Live Link
-https://andrewleach94.github.io/library/
+https://andrewleach94.github.io/tic-tac-toe/
 
 #### Overview
 Two players duel it out in a game of tic-tac-toe. This is built entirely with vanilla Javascript. I'd like to add a real-time database to allow two users to play simutaniously. 
